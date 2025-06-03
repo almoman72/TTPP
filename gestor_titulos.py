@@ -20,15 +20,19 @@ filas = []
 for t in titulaciones:
     filas.append({
         "ID": t.get("idCurso"),
-        "Denominación": t.get("denominacion"),  # Cambiado aquí
+        "Denominación": t.get("denominacion"),
         "Fecha inicio": t.get("fechaInicio")
     })
 
 df = pd.DataFrame(filas)
 
+# === Eliminar filas sin fecha de inicio ===
+df = df[df["Fecha inicio"].notnull() & (df["Fecha inicio"] != "")]
+
 if df.empty:
-    st.error("No se han encontrado datos de títulos propios.")
+    st.error("No se han encontrado datos de títulos propios con fecha de inicio.")
     st.stop()
 
 st.dataframe(df)
+
 
