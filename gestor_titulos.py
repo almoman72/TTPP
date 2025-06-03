@@ -20,7 +20,7 @@ filas = []
 for t in titulaciones:
     filas.append({
         "ID": t.get("idCurso"),
-        "Denominación": t.get("denominacion"),  # Cambiado aquí
+        "Denominación": t.get("denominacion"),
         "Fecha inicio": t.get("fechaInicio")
     })
 
@@ -30,4 +30,18 @@ if df.empty:
     st.error("No se han encontrado datos de títulos propios.")
     st.stop()
 
+# ----------- BÚSQUEDA POR DENOMINACIÓN -----------
+busqueda = st.text_input("Buscar por denominación:")
+if busqueda:
+    df = df[df["Denominación"].str.contains(busqueda, case=False, na=False)]
+
+# ----------- ORDENAR POR FECHA INICIO -----------
+# Convierte la columna de fecha a datetime para ordenarla bien
+df["Fecha inicio"] = pd.to_datetime(df["Fecha inicio"], errors="coerce")
+df = df.sort_values(by="Fecha inicio")
+
+# Formatea la columna fecha para que vuelva a ser texto en el DataFrame mostrado
+df["Fecha inicio"] = df["Fecha inicio"].dt.strftime("%d-%m-%Y")
+
 st.dataframe(df)
+
