@@ -36,8 +36,22 @@ if df.empty:
 # Paso 1: Convertir a fecha
 df["Fecha inicio"] = pd.to_datetime(df["Fecha inicio"], errors="coerce")
 
+# ------ ORDENACIÓN POR BOTÓN ------
+# Inicializa el estado si no existe
+if "ascendente" not in st.session_state:
+    st.session_state.ascendente = True
+
+if st.button("Ordenar por Fecha de Inicio"):
+    st.session_state.ascendente = not st.session_state.ascendente
+
+orden = st.session_state.ascendente
+
+# Ordena según el estado
+df = df.sort_values(by="Fecha inicio", ascending=orden)
+
 # Paso 2: Formatear a dd/mm/yyyy (solo fechas válidas)
 df["Fecha inicio"] = df["Fecha inicio"].apply(lambda x: x.strftime('%d/%m/%Y') if pd.notnull(x) else "")
 
 st.dataframe(df)
+
 
