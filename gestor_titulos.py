@@ -41,8 +41,8 @@ if busqueda:
 # Paso 1: Convertir a fecha
 df["Fecha inicio"] = pd.to_datetime(df["Fecha inicio"], errors="coerce")
 
-# Añadir columna 'Año'
-df["Año"] = df["Fecha inicio"].dt.year
+# Añadir columna 'Año' de forma segura
+df["Año"] = df["Fecha inicio"].apply(lambda x: x.year if pd.notnull(x) else "")
 
 # ------ ORDENACIÓN POR BOTÓN ------
 if "ascendente" not in st.session_state:
@@ -58,5 +58,7 @@ df = df.sort_values(by="Fecha inicio", ascending=orden)
 # Paso 2: Formatear a dd/mm/yyyy (solo fechas válidas)
 df["Fecha inicio"] = df["Fecha inicio"].apply(lambda x: x.strftime('%d/%m/%Y') if pd.notnull(x) else "")
 
-# Muestra la tabla con la nueva columna
+# Puedes reorganizar las columnas si lo deseas:
+df = df[["ID", "Denominación", "Fecha inicio", "Año"]]
+
 st.dataframe(df)
