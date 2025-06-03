@@ -33,7 +33,11 @@ if df.empty:
     st.error("No se han encontrado datos de títulos propios con fecha de inicio.")
     st.stop()
 
-# Convertir "Fecha inicio" a tipo fecha y formatear
-df["Fecha inicio"] = pd.to_datetime(df["Fecha inicio"], errors="coerce").dt.strftime('%d/%m/%Y')
+# Paso 1: Convertir a fecha
+df["Fecha inicio"] = pd.to_datetime(df["Fecha inicio"], errors="coerce")
+
+# Paso 2: Formatear a dd/mm/yyyy (solo fechas válidas)
+df["Fecha inicio"] = df["Fecha inicio"].apply(lambda x: x.strftime('%d/%m/%Y') if pd.notnull(x) else "")
 
 st.dataframe(df)
+
