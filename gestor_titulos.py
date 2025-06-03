@@ -33,21 +33,17 @@ if df.empty:
     st.error("No se han encontrado datos de títulos propios con fecha de inicio.")
     st.stop()
 
-# ---> Convierte a datetime lo antes posible <---
-df["Fecha inicio"] = pd.to_datetime(df["Fecha inicio"], errors="coerce")
+# ---- Crear columna auxiliar para filtrar y ordenar ----
+df["fecha_aux"] = pd.to_datetime(df["Fecha inicio"], errors="coerce")
 
 # ---- FILTRO POR AÑO ----
-if not df["Fecha inicio"].isnull().all():
-    anios = df["Fecha inicio"].dropna().dt.year.astype(int).unique()
-    anios = sorted(anios)
-    opciones = ["Todos"] + [str(a) for a in anios]
-else:
-    opciones = ["Todos"]
+anios_disponibles = sorted(df["fecha_aux"].dropna().dt.year.unique())
+opciones_anio = ["Todos"] + [str(a) for a in anios_disponibles]
 
-anio_seleccionado = st.selectbox("Filtrar por año de inicio", options=opciones)
+anio_seleccionado = st.selectbox("Filtrar por año de inicio", options=opciones_anio)
 
 if anio_seleccionado != "Todos":
-    df = df[df["Fecha inicio"].dt.year == int(anio_seleccionado)]
+    df = df[df["fecha_aux"].dt.year == int(anio_seleccionado)]
 
 # ------ ORDENACIÓN POR BOTÓN ------
 if "ascendente" not in st.session_state:
@@ -57,9 +53,11 @@ if st.button("Ordenar por Fecha de Inicio"):
     st.session_state.ascendente = not st.session_state.ascendente
 
 orden = st.session_state.ascendente
-df = df.sort_values(by="Fecha inicio", ascending=orden)
+df = df.sort_values(by="fecha_aux", ascending=orden)
 
-# Paso 2: Formatear a dd/mm/yyyy (solo fechas válidas)
-df["Fecha inicio"] = df["Fecha inicio"].apply(lambda x: x.strftime('%d/%m/%Y') if pd.notnull(x) else "")
+# Paso 2: Mostrar la fecha en formato dd/mm/yyyy
+df["Fecha inicio"] = df["fecha_aux"].apply(lambda x: x.strftime('%d/%m/%Y') if pd.notnull(x) else "")
 
-st.dataframe(df)
+# ---- Mostrar la tabla solo con las columnas deseadas ----
+st.dataframe(df[["ID", "Denominación", "Fecha inicio"]])
+
