@@ -26,13 +26,14 @@ for t in titulaciones:
 
 df = pd.DataFrame(filas)
 
-# === Eliminar filas sin fecha de inicio ===
+# Eliminar filas sin fecha de inicio
 df = df[df["Fecha inicio"].notnull() & (df["Fecha inicio"] != "")]
 
 if df.empty:
     st.error("No se han encontrado datos de títulos propios con fecha de inicio.")
     st.stop()
 
+# Convertir "Fecha inicio" a tipo fecha y formatear
+df["Fecha inicio"] = pd.to_datetime(df["Fecha inicio"], errors="coerce").dt.strftime('%d/%m/%Y')
+
 st.dataframe(df)
-
-
