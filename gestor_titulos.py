@@ -30,5 +30,13 @@ for t in titulaciones:
 
 df = pd.DataFrame(filas)
 
+# Diagnóstico: muestra columnas y ejemplo de datos
+st.write("Columnas del DataFrame:", df.columns.tolist())
+st.write(df.head())
+
+if df.empty:
+    st.error("No se han encontrado datos de títulos propios.")
+    st.stop()
+
 # Muestra la tabla en Streamlit
 st.dataframe(df)
