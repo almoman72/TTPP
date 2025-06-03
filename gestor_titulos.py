@@ -33,17 +33,18 @@ if df.empty:
     st.error("No se han encontrado datos de títulos propios con fecha de inicio.")
     st.stop()
 
-# --- CONVIERTE A DATETIME JUSTO ANTES DE USAR .dt ---
+# ---> Convierte a datetime lo antes posible <---
 df["Fecha inicio"] = pd.to_datetime(df["Fecha inicio"], errors="coerce")
 
 # ---- FILTRO POR AÑO ----
-anios = df["Fecha inicio"].dropna().dt.year.unique()
-anios = sorted([int(a) for a in anios if pd.notnull(a)])
+if not df["Fecha inicio"].isnull().all():
+    anios = df["Fecha inicio"].dropna().dt.year.astype(int).unique()
+    anios = sorted(anios)
+    opciones = ["Todos"] + [str(a) for a in anios]
+else:
+    opciones = ["Todos"]
 
-anio_seleccionado = st.selectbox(
-    "Filtrar por año de inicio",
-    options=["Todos"] + [str(a) for a in anios]
-)
+anio_seleccionado = st.selectbox("Filtrar por año de inicio", options=opciones)
 
 if anio_seleccionado != "Todos":
     df = df[df["Fecha inicio"].dt.year == int(anio_seleccionado)]
