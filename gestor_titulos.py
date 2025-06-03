@@ -33,16 +33,13 @@ if df.empty:
     st.error("No se han encontrado datos de títulos propios con fecha de inicio.")
     st.stop()
 
+# --- Búsqueda por denominación ---
+busqueda = st.text_input("Buscar por denominación:")
+if busqueda:
+    df = df[df["Denominación"].str.contains(busqueda, case=False, na=False)]
+
 # Paso 1: Convertir a fecha
 df["Fecha inicio"] = pd.to_datetime(df["Fecha inicio"], errors="coerce")
-
-# ==== FILTRO POR AÑO ====
-# Obtener los años únicos antes de formatear a texto
-anios = sorted(df["Fecha inicio"].dropna().dt.year.unique())
-anio_sel = st.selectbox("Filtrar por año de inicio", options=["Todos"] + [str(a) for a in anios])
-
-if anio_sel != "Todos":
-    df = df[df["Fecha inicio"].dt.year == int(anio_sel)]
 
 # ------ ORDENACIÓN POR BOTÓN ------
 if "ascendente" not in st.session_state:
