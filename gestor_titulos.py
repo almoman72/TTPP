@@ -38,12 +38,9 @@ if busqueda:
 # ----------- ORDENAR POR FECHA INICIO -----------
 # Convierte la columna de fecha a datetime para ordenarla bien
 df["Fecha inicio"] = pd.to_datetime(df["Fecha inicio"], errors="coerce")
-
 df = df.sort_values(by="Fecha inicio")
 
-# Ahora, formatea las fechas solo si son fechas válidas
-df["Fecha inicio"] = df["Fecha inicio"].apply(
-    lambda x: x.strftime("%d-%m-%Y") if pd.notnull(x) else ""
-)
+# Formatea la columna fecha para que vuelva a ser texto en el DataFrame mostrado
+df["Fecha inicio"] = df["Fecha inicio"].dt.strftime("%d-%m-%Y")
 
 st.dataframe(df)
