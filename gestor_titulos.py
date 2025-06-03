@@ -7,18 +7,18 @@ import os
 st.title("Listado de Títulos Propios UPV")
 
 URL = "https://www.cfp.upv.es/cfp-gow/titulaciones/web"
-ARCHIVO_TRATADOS = "tratados.json"
+ARCHIVO_ESTADO = "estado_titulos.json"
 
-# --- Función para cargar el estado ---
-def cargar_tratados(archivo):
+# --- Funciones para guardar/cargar estado ---
+def cargar_estado(archivo):
     if os.path.exists(archivo):
         with open(archivo, "r") as f:
-            return set(json.load(f))
-    return set()
+            return json.load(f)
+    return {}
 
-def guardar_tratados(archivo, tratados):
+def guardar_estado(archivo, estado):
     with open(archivo, "w") as f:
-        json.dump(list(tratados), f)
+        json.dump(estado, f)
 
 # --- Descarga y limpieza de datos ---
 try:
@@ -75,32 +75,40 @@ df = df.sort_values(by="Fecha inicio", ascending=orden)
 # Formatear a dd/mm/yyyy
 df["Fecha inicio"] = df["Fecha inicio"].apply(lambda x: x.strftime('%d/%m/%Y') if pd.notnull(x) else "")
 
-# ==== MARCADO DE TRATADOS ====
+# ==== MARCADO DE PUBLICADO Y DISEÑO ====
 # Cargar estado anterior
-tratados = cargar_tratados(ARCHIVO_TRATADOS)
+estado = cargar_estado(ARCHIVO_ESTADO)
 
-# Añadir columna Tratado (booleano)
-df["Tratado"] = df["ID"].apply(lambda x: x in tratados)
+# Inicializa los valores para cada curso
+df["Publicado"] = df["ID"].apply(lambda x: estado.get(str(x), {}).get("Publicado", False))
+df["Diseño"] = df["ID"].apply(lambda x: estado.get(str(x), {}).get("Diseño", False))
 
-# Mostrar y permitir marcar checkboxes
-st.write("Marca los títulos que ya has tratado:")
-nuevos_tratados = set(tratados)
+st.write("Marca los títulos según corresponda:")
+nuevo_estado = estado.copy()
 for idx, row in df.iterrows():
-    checked = st.checkbox(
-        f"{row['Denominación']} ({row['Fecha inicio']})",
-        value=row["Tratado"],
-        key=str(row["ID"])
+    key_base = str(row["ID"])
+    publicado = st.checkbox(
+        f"Publicado - {row['Denominación']} ({row['Fecha inicio']})",
+        value=row["Publicado"],
+        key=key_base + "_publicado"
     )
-    if checked:
-        nuevos_tratados.add(row["ID"])
-    else:
-        nuevos_tratados.discard(row["ID"])
+    diseno = st.checkbox(
+        f"Diseño - {row['Denominación']} ({row['Fecha inicio']})",
+        value=row["Diseño"],
+        key=key_base + "_diseno"
+    )
+    nuevo_estado[key_base] = {
+        "Publicado": publicado,
+        "Diseño": diseno
+    }
 
-# Guardar al archivo el nuevo estado
-guardar_tratados(ARCHIVO_TRATADOS, nuevos_tratados)
+# Guardar estado actualizado
+guardar_estado(ARCHIVO_ESTADO, nuevo_estado)
 
-# Mostrar la tabla con el estado actual de "Tratado"
-df["Tratado"] = df["ID"].apply(lambda x: x in nuevos_tratados)
-df = df[["ID", "Denominación", "Fecha inicio", "Año", "Tratado"]]
+# Actualizar las columnas del DataFrame para la visualización
+df["Publicado"] = df["ID"].apply(lambda x: nuevo_estado.get(str(x), {}).get("Publicado", False))
+df["Diseño"] = df["ID"].apply(lambda x: nuevo_estado.get(str(x), {}).get("Diseño", False))
+
+df = df[["ID", "Denominación", "Fecha inicio", "Año", "Publicado", "Diseño"]]
 
 st.dataframe(df)
