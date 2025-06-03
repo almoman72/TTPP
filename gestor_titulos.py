@@ -41,8 +41,16 @@ if busqueda:
 # Paso 1: Convertir a fecha
 df["Fecha inicio"] = pd.to_datetime(df["Fecha inicio"], errors="coerce")
 
-# Añadir columna 'Año' de forma segura
+# Añadir columna 'Año'
 df["Año"] = df["Fecha inicio"].apply(lambda x: x.year if pd.notnull(x) else "")
+
+# --- Filtro por año ---
+anios_disponibles = sorted(df["Año"].unique())
+opciones_filtro = ["Todos"] + [str(a) for a in anios_disponibles if str(a) != ""]
+anio_filtro = st.selectbox("Filtrar por año", options=opciones_filtro)
+
+if anio_filtro != "Todos":
+    df = df[df["Año"] == int(anio_filtro)]
 
 # ------ ORDENACIÓN POR BOTÓN ------
 if "ascendente" not in st.session_state:
@@ -58,7 +66,6 @@ df = df.sort_values(by="Fecha inicio", ascending=orden)
 # Paso 2: Formatear a dd/mm/yyyy (solo fechas válidas)
 df["Fecha inicio"] = df["Fecha inicio"].apply(lambda x: x.strftime('%d/%m/%Y') if pd.notnull(x) else "")
 
-# Puedes reorganizar las columnas si lo deseas:
 df = df[["ID", "Denominación", "Fecha inicio", "Año"]]
 
 st.dataframe(df)
