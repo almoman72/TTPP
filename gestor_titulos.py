@@ -3,10 +3,9 @@ import requests
 import pandas as pd
 import json
 import os
+import calendar
 
 st.set_page_config(layout="wide")  # <-- ¡Esto hace la app más ancha!
-
-# ... [Cabecera y logo igual que antes] ...
 
 URL = "https://www.cfp.upv.es/cfp-gow/titulaciones/web"
 ARCHIVO_ESTADO = "estado_titulos.json"
@@ -34,7 +33,7 @@ filas = []
 for t in titulaciones:
     filas.append({
         "ID": t.get("idCurso"),
-        "ID Proyecto": t.get("idProyectoDocente"),  # NUEVA COLUMNA
+        "ID Proyecto": t.get("idProyectoDocente"),
         "Denominación": t.get("denominacion"),
         "Fecha inicio": t.get("fechaInicio")
     })
@@ -52,6 +51,9 @@ if busqueda:
 
 df["Fecha inicio"] = pd.to_datetime(df["Fecha inicio"], errors="coerce")
 df["Año"] = df["Fecha inicio"].apply(lambda x: x.year if pd.notnull(x) else "")
+
+# >>>> AÑADIMOS AQUÍ LA COLUMNA MES <<<<
+df["Mes"] = df["Fecha inicio"].apply(lambda x: calendar.month_name[x.month].capitalize() if pd.notnull(x) else "")
 
 anios_disponibles = sorted(df["Año"].unique())
 opciones_filtro = ["Todos"] + [str(a) for a in anios_disponibles if str(a) != ""]
@@ -106,7 +108,8 @@ guardar_estado(ARCHIVO_ESTADO, nuevo_estado)
 df["Publicado"] = df["ID"].apply(lambda x: nuevo_estado.get(str(x), {}).get("Publicado", False))
 df["Diseño"] = df["ID"].apply(lambda x: nuevo_estado.get(str(x), {}).get("Diseño", False))
 
-# Añadir la columna "ID Proyecto" a la tabla final
-df = df[["ID", "ID Proyecto", "Denominación", "Fecha inicio", "Año", "Publicado", "Diseño"]]
+# Ahora incluye la columna "Mes" en la tabla:
+df = df[["ID", "ID Proyecto", "Denominación", "Fecha inicio", "Año", "Mes", "Publicado", "Diseño"]]
 
 st.dataframe(df)
+
