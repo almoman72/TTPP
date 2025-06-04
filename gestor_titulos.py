@@ -5,7 +5,7 @@ import json
 import os
 import calendar
 
-st.set_page_config(layout="wide")  # Página ancha
+st.set_page_config(layout="wide")
 
 URL = "https://www.cfp.upv.es/cfp-gow/titulaciones/web"
 ARCHIVO_ESTADO = "estado_titulos.json"
@@ -63,6 +63,16 @@ anio_filtro = st.selectbox("Filtrar por año", options=opciones_filtro)
 
 if anio_filtro != "Todos":
     df = df[df["Año"] == int(anio_filtro)]
+
+# --- Filtro múltiple por mes ---
+meses_disponibles = [m for m in df["Mes"].unique() if m]
+meses_seleccionados = st.multiselect(
+    "Filtrar por mes de inicio",
+    options=meses_disponibles,
+    default=meses_disponibles
+)
+if meses_seleccionados:
+    df = df[df["Mes"].isin(meses_seleccionados)]
 
 if "ascendente" not in st.session_state:
     st.session_state.ascendente = True
