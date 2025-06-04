@@ -4,7 +4,7 @@ import pandas as pd
 import json
 import os
 
-st.title("Listado de Títulos Propios UPV")
+# ... [Cabecera y logo igual que antes] ...
 
 URL = "https://www.cfp.upv.es/cfp-gow/titulaciones/web"
 ARCHIVO_ESTADO = "estado_titulos.json"
@@ -32,6 +32,7 @@ filas = []
 for t in titulaciones:
     filas.append({
         "ID": t.get("idCurso"),
+        "ID Proyecto Docente": t.get("idProyectoDocente"),  # NUEVA COLUMNA
         "Denominación": t.get("denominacion"),
         "Fecha inicio": t.get("fechaInicio")
     })
@@ -67,14 +68,14 @@ orden = st.session_state.ascendente
 df = df.sort_values(by="Fecha inicio", ascending=orden)
 df["Fecha inicio"] = df["Fecha inicio"].apply(lambda x: x.strftime('%d/%m/%Y') if pd.notnull(x) else "")
 
-# ==== EDITOR DE ESTADO (checkboxes en una línea) ====
+# EDITOR DE ESTADO (checkboxes en una línea)
 estado = cargar_estado(ARCHIVO_ESTADO)
 
-st.write("Edita el estado de los títulos:")
+st.markdown("### Edita el estado de los títulos:")
 nuevo_estado = estado.copy()
 for idx, row in df.iterrows():
     key_base = str(row["ID"])
-    col1, col2, col3, col4 = st.columns([1, 1, 5, 2])
+    col1, col2, col3, col4, col5 = st.columns([1, 1, 3, 5, 2])
     with col1:
         publicado = st.checkbox(
             "Publicado",
@@ -88,9 +89,11 @@ for idx, row in df.iterrows():
             key=key_base + "_diseno"
         )
     with col3:
-        st.markdown(f"**{row['Denominación']}**")
+        st.markdown(f"<span style='color:#003865'><b>{row['Denominación']}</b></span>", unsafe_allow_html=True)
     with col4:
-        st.markdown(row["Fecha inicio"])
+        st.markdown(f"ID Proyecto Docente: <b>{row['ID Proyecto Docente']}</b>", unsafe_allow_html=True)
+    with col5:
+        st.markdown(f"<span style='color:#FF8200'>{row['Fecha inicio']}</span>", unsafe_allow_html=True)
     nuevo_estado[key_base] = {
         "Publicado": publicado,
         "Diseño": diseno
@@ -101,7 +104,7 @@ guardar_estado(ARCHIVO_ESTADO, nuevo_estado)
 df["Publicado"] = df["ID"].apply(lambda x: nuevo_estado.get(str(x), {}).get("Publicado", False))
 df["Diseño"] = df["ID"].apply(lambda x: nuevo_estado.get(str(x), {}).get("Diseño", False))
 
-df = df[["ID", "Denominación", "Fecha inicio", "Año", "Publicado", "Diseño"]]
+# Añadir la columna "ID Proyecto Docente" a la tabla final
+df = df[["ID", "ID Proyecto Docente", "Denominación", "Fecha inicio", "Año", "Publicado", "Diseño"]]
 
 st.dataframe(df)
-
