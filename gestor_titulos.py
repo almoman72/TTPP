@@ -125,4 +125,11 @@ df["Diseño"] = df["ID"].apply(lambda x: nuevo_estado.get(str(x), {}).get("Dise�
 # ---- Tabla final, incluye la columna Mes ----
 df = df[["ID", "ID Proyecto", "Denominación", "Fecha inicio", "Año", "Mes", "Publicado", "Diseño"]]
 
-st.dataframe(df)
+# ---- Estilo stripe en la tabla ----
+def stripe_rows(row):
+    return ['background-color: #f2f4f8' if row.name % 2 == 0 else '' for _ in row]
+
+st.dataframe(
+    df.style.apply(stripe_rows, axis=1),
+    use_container_width=True
+)
