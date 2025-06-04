@@ -4,6 +4,8 @@ import pandas as pd
 import json
 import os
 
+st.set_page_config(layout="wide")  # <-- ¡Esto hace la app más ancha!
+
 # ... [Cabecera y logo igual que antes] ...
 
 URL = "https://www.cfp.upv.es/cfp-gow/titulaciones/web"
@@ -32,7 +34,7 @@ filas = []
 for t in titulaciones:
     filas.append({
         "ID": t.get("idCurso"),
-        "ID Proyecto Docente": t.get("idProyectoDocente"),  # NUEVA COLUMNA
+        "ID Proyecto": t.get("idProyectoDocente"),  # NUEVA COLUMNA
         "Denominación": t.get("denominacion"),
         "Fecha inicio": t.get("fechaInicio")
     })
@@ -91,7 +93,7 @@ for idx, row in df.iterrows():
     with col3:
         st.markdown(f"<span style='color:#003865'><b>{row['Denominación']}</b></span>", unsafe_allow_html=True)
     with col4:
-        st.markdown(f"ID Proyecto Docente: <b>{row['ID Proyecto Docente']}</b>", unsafe_allow_html=True)
+        st.markdown(f"ID Proyecto Docente: <b>{row['ID Proyecto']}</b>", unsafe_allow_html=True)
     with col5:
         st.markdown(f"<span style='color:#FF8200'>{row['Fecha inicio']}</span>", unsafe_allow_html=True)
     nuevo_estado[key_base] = {
