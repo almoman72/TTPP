@@ -5,7 +5,7 @@ import json
 import os
 import calendar
 
-st.set_page_config(layout="wide")  # <-- ¡Esto hace la app más ancha!
+st.set_page_config(layout="wide")  # Página ancha
 
 URL = "https://www.cfp.upv.es/cfp-gow/titulaciones/web"
 ARCHIVO_ESTADO = "estado_titulos.json"
@@ -52,8 +52,10 @@ if busqueda:
 df["Fecha inicio"] = pd.to_datetime(df["Fecha inicio"], errors="coerce")
 df["Año"] = df["Fecha inicio"].apply(lambda x: x.year if pd.notnull(x) else "")
 
-# >>>> AÑADIMOS AQUÍ LA COLUMNA MES <<<<
-df["Mes"] = df["Fecha inicio"].apply(lambda x: calendar.month_name[x.month].capitalize() if pd.notnull(x) else "")
+# ---- Añadir columna "Mes" (nombre) ----
+df["Mes"] = df["Fecha inicio"].apply(
+    lambda x: calendar.month_name[x.month].capitalize() if pd.notnull(x) else ""
+)
 
 anios_disponibles = sorted(df["Año"].unique())
 opciones_filtro = ["Todos"] + [str(a) for a in anios_disponibles if str(a) != ""]
@@ -72,14 +74,14 @@ orden = st.session_state.ascendente
 df = df.sort_values(by="Fecha inicio", ascending=orden)
 df["Fecha inicio"] = df["Fecha inicio"].apply(lambda x: x.strftime('%d/%m/%Y') if pd.notnull(x) else "")
 
-# EDITOR DE ESTADO (checkboxes en una línea)
+# ==== EDITOR DE ESTADO (checkboxes en una línea, con Mes) ====
 estado = cargar_estado(ARCHIVO_ESTADO)
 
 st.markdown("### Edita el estado de los títulos:")
 nuevo_estado = estado.copy()
 for idx, row in df.iterrows():
     key_base = str(row["ID"])
-    col1, col2, col3, col4, col5 = st.columns([1, 1, 3, 5, 2])
+    col1, col2, col3, col4, col5, col6 = st.columns([1, 1, 3, 4, 2, 2])
     with col1:
         publicado = st.checkbox(
             "Publicado",
@@ -98,6 +100,8 @@ for idx, row in df.iterrows():
         st.markdown(f"ID Proyecto Docente: <b>{row['ID Proyecto']}</b>", unsafe_allow_html=True)
     with col5:
         st.markdown(f"<span style='color:#FF8200'>{row['Fecha inicio']}</span>", unsafe_allow_html=True)
+    with col6:
+        st.markdown(f"<span style='color:#003865'>{row['Mes']}</span>", unsafe_allow_html=True)
     nuevo_estado[key_base] = {
         "Publicado": publicado,
         "Diseño": diseno
@@ -108,8 +112,7 @@ guardar_estado(ARCHIVO_ESTADO, nuevo_estado)
 df["Publicado"] = df["ID"].apply(lambda x: nuevo_estado.get(str(x), {}).get("Publicado", False))
 df["Diseño"] = df["ID"].apply(lambda x: nuevo_estado.get(str(x), {}).get("Diseño", False))
 
-# Ahora incluye la columna "Mes" en la tabla:
+# ---- Tabla final, incluye la columna Mes ----
 df = df[["ID", "ID Proyecto", "Denominación", "Fecha inicio", "Año", "Mes", "Publicado", "Diseño"]]
 
 st.dataframe(df)
-
