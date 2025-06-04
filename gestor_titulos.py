@@ -87,32 +87,41 @@ df["Fecha inicio"] = df["Fecha inicio"].apply(lambda x: x.strftime('%d/%m/%Y') i
 # ==== EDITOR DE ESTADO (checkboxes en una línea, con Mes) ====
 estado = cargar_estado(ARCHIVO_ESTADO)
 
+stripe_color = "#f2f4f8"  # Gris clarito para las filas pares
+
 st.markdown("### Edita el estado de los títulos:")
 nuevo_estado = estado.copy()
 for idx, row in df.iterrows():
-    key_base = str(row["ID"])
-    col1, col2, col3, col4, col5, col6 = st.columns([1, 1, 3, 4, 2, 2])
-    with col1:
-        publicado = st.checkbox(
-            "Publicado",
-            value=estado.get(key_base, {}).get("Publicado", False),
-            key=key_base + "_publicado"
+    # Alterna el color de fondo
+    background = stripe_color if idx % 2 == 0 else "#ffffff"
+    with st.container():
+        st.markdown(
+            f"<div style='background-color: {background}; padding: 6px 0 3px 0; border-radius: 6px;'>",
+            unsafe_allow_html=True
         )
-    with col2:
-        diseno = st.checkbox(
-            "Diseño",
-            value=estado.get(key_base, {}).get("Diseño", False),
-            key=key_base + "_diseno"
-        )
-    with col3:
-        st.markdown(f"<span style='color:#003865'><b>{row['Denominación']}</b></span>", unsafe_allow_html=True)
-    with col4:
-        st.markdown(f"ID Proyecto Docente: <b>{row['ID Proyecto']}</b>", unsafe_allow_html=True)
-    with col5:
-        st.markdown(f"<span style='color:#FF8200'>{row['Fecha inicio']}</span>", unsafe_allow_html=True)
-    with col6:
-        st.markdown(f"<span style='color:#003865'>{row['Mes']}</span>", unsafe_allow_html=True)
-    nuevo_estado[key_base] = {
+        col1, col2, col3, col4, col5, col6 = st.columns([1, 1, 3, 4, 2, 2])
+        with col1:
+            publicado = st.checkbox(
+                "Publicado",
+                value=estado.get(str(row["ID"]), {}).get("Publicado", False),
+                key=str(row["ID"]) + "_publicado"
+            )
+        with col2:
+            diseno = st.checkbox(
+                "Diseño",
+                value=estado.get(str(row["ID"]), {}).get("Diseño", False),
+                key=str(row["ID"]) + "_diseno"
+            )
+        with col3:
+            st.markdown(f"<span style='color:#003865'><b>{row['Denominación']}</b></span>", unsafe_allow_html=True)
+        with col4:
+            st.markdown(f"ID Proyecto Docente: <b>{row['ID Proyecto']}</b>", unsafe_allow_html=True)
+        with col5:
+            st.markdown(f"<span style='color:#FF8200'>{row['Fecha inicio']}</span>", unsafe_allow_html=True)
+        with col6:
+            st.markdown(f"<span style='color:#003865'>{row['Mes']}</span>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+    nuevo_estado[str(row["ID"])] = {
         "Publicado": publicado,
         "Diseño": diseno
     }
