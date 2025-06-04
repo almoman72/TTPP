@@ -106,7 +106,7 @@ guardar_estado(ARCHIVO_ESTADO, nuevo_estado)
 df["Publicado"] = df["ID"].apply(lambda x: nuevo_estado.get(str(x), {}).get("Publicado", False))
 df["Diseño"] = df["ID"].apply(lambda x: nuevo_estado.get(str(x), {}).get("Diseño", False))
 
-# Añadir la columna "ID Proyecto Docente" a la tabla final
-df = df[["ID", "ID Proyecto Docente", "Denominación", "Fecha inicio", "Año", "Publicado", "Diseño"]]
+# Añadir la columna "ID Proyecto" a la tabla final
+df = df[["ID", "ID Proyecto", "Denominación", "Fecha inicio", "Año", "Publicado", "Diseño"]]
 
 st.dataframe(df)
