@@ -10,13 +10,14 @@ st.set_page_config(layout="wide")
 URL = "https://www.cfp.upv.es/cfp-gow/titulaciones/web"
 ARCHIVO_ESTADO = "estado_titulos.json"
 
+# Función robusta para cargar el estado, incluso si el JSON está vacío/corrupto
 def cargar_estado(archivo):
     if os.path.exists(archivo):
         try:
             with open(archivo, "r") as f:
                 return json.load(f)
         except Exception:
-            return {}  # Si el archivo está vacío o corrupto, empieza con estado vacío
+            return {}  # Si hay error, empieza con estado vacío
     return {}
 
 def guardar_estado(archivo, estado):
@@ -141,4 +142,28 @@ filtro_diseno = st.selectbox(
     index=0
 )
 filtro_publicado = st.selectbox(
-    "F
+    "Filtrar por 'Publicado'",
+    options=["Todos", "Sí", "No"],
+    index=0
+)
+
+if filtro_diseno == "Sí":
+    df = df[df["Diseño"] == True]
+elif filtro_diseno == "No":
+    df = df[df["Diseño"] == False]
+
+if filtro_publicado == "Sí":
+    df = df[df["Publicado"] == True]
+elif filtro_publicado == "No":
+    df = df[df["Publicado"] == False]
+
+# ---- Tabla final, incluye la columna Mes ----
+df = df[["ID", "ID Proyecto", "Denominación", "Fecha inicio", "Año", "Mes", "Publicado", "Diseño"]]
+
+def stripe_rows(row):
+    return ['background-color: #f2f4f8' if row.name % 2 == 0 else '' for _ in row]
+
+st.dataframe(
+    df.style.apply(stripe_rows, axis=1),
+    use_container_width=True
+)
