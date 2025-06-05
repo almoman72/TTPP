@@ -132,10 +132,11 @@ for idx, row in df.iterrows():
 
 guardar_estado(ARCHIVO_ESTADO, nuevo_estado)
 
+# --- Actualiza el DataFrame con los checks tras la edición ---
 df["Publicado"] = df["ID"].apply(lambda x: nuevo_estado.get(str(x), {}).get("Publicado", False))
 df["Diseño"] = df["ID"].apply(lambda x: nuevo_estado.get(str(x), {}).get("Diseño", False))
 
-# --- Filtros para "Diseño" y "Publicado" ---
+# --- Filtros para "Diseño" y "Publicado" aplicados también a la lista ---
 filtro_diseno = st.selectbox(
     "Filtrar por 'Diseño'",
     options=["Todos", "Sí", "No"],
