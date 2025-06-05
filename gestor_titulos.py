@@ -45,6 +45,7 @@ if df.empty:
     st.error("No se han encontrado datos de títulos propios con fecha de inicio.")
     st.stop()
 
+# --- Buscador por denominación ---
 busqueda = st.text_input("Buscar por denominación:")
 if busqueda:
     df = df[df["Denominación"].str.contains(busqueda, case=False, na=False)]
@@ -57,10 +58,10 @@ df["Mes"] = df["Fecha inicio"].apply(
     lambda x: calendar.month_name[x.month].capitalize() if pd.notnull(x) else ""
 )
 
+# --- Filtro por año ---
 anios_disponibles = sorted(df["Año"].unique())
 opciones_filtro = ["Todos"] + [str(a) for a in anios_disponibles if str(a) != ""]
 anio_filtro = st.selectbox("Filtrar por año", options=opciones_filtro)
-
 if anio_filtro != "Todos":
     df = df[df["Año"] == int(anio_filtro)]
 
@@ -84,15 +85,14 @@ orden = st.session_state.ascendente
 df = df.sort_values(by="Fecha inicio", ascending=orden)
 df["Fecha inicio"] = df["Fecha inicio"].apply(lambda x: x.strftime('%d/%m/%Y') if pd.notnull(x) else "")
 
-# ==== EDITOR DE ESTADO (checkboxes en una línea, con Mes) ====
+# ==== EDITOR DE ESTADO (checkboxes en una línea, con Mes y estilo stripe) ====
 estado = cargar_estado(ARCHIVO_ESTADO)
-
-stripe_color = "#f2f4f8"  # Gris clarito para las filas pares
 
 st.markdown("### Edita el estado de los títulos:")
 nuevo_estado = estado.copy()
+stripe_color = "#f2f4f8"  # Gris claro para stripe
+
 for idx, row in df.iterrows():
-    # Alterna el color de fondo
     background = stripe_color if idx % 2 == 0 else "#ffffff"
     with st.container():
         st.markdown(
@@ -131,14 +131,11 @@ guardar_estado(ARCHIVO_ESTADO, nuevo_estado)
 df["Publicado"] = df["ID"].apply(lambda x: nuevo_estado.get(str(x), {}).get("Publicado", False))
 df["Diseño"] = df["ID"].apply(lambda x: nuevo_estado.get(str(x), {}).get("Diseño", False))
 
-# ---- Tabla final, incluye la columna Mes ----
-df = df[["ID", "ID Proyecto", "Denominación", "Fecha inicio", "Año", "Mes", "Publicado", "Diseño"]]
-
-# ---- Estilo stripe en la tabla ----
-def stripe_rows(row):
-    return ['background-color: #f2f4f8' if row.name % 2 == 0 else '' for _ in row]
-
-st.dataframe(
-    df.style.apply(stripe_rows, axis=1),
-    use_container_width=True
+# --- Filtros para "Diseño" y "Publicado" ---
+filtro_diseno = st.selectbox(
+    "Filtrar por 'Diseño'",
+    options=["Todos", "Sí", "No"],
+    index=0
 )
+filtro_publicado = st.selectbox(
+    "F
