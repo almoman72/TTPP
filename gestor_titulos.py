@@ -12,8 +12,11 @@ ARCHIVO_ESTADO = "estado_titulos.json"
 
 def cargar_estado(archivo):
     if os.path.exists(archivo):
-        with open(archivo, "r") as f:
-            return json.load(f)
+        try:
+            with open(archivo, "r") as f:
+                return json.load(f)
+        except Exception:
+            return {}  # Si el archivo está vacío o corrupto, empieza con estado vacío
     return {}
 
 def guardar_estado(archivo, estado):
