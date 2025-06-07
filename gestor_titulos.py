@@ -24,6 +24,17 @@ def guardar_estado(archivo, estado):
     with open(archivo, "w") as f:
         json.dump(estado, f)
 
+# -- Cargar estado desde un archivo subido --
+uploaded_file = st.file_uploader("Subir estado (JSON) para restaurar", type=["json"])
+if uploaded_file:
+    try:
+        estado_subido = json.load(uploaded_file)
+        guardar_estado(ARCHIVO_ESTADO, estado_subido)
+        st.success("Estado restaurado correctamente. Recarga la página para ver los cambios.")
+    except Exception:
+        st.error("El archivo subido no es un JSON válido.")
+
+# -- Resto de la aplicación --
 try:
     response = requests.get(URL)
     response.raise_for_status()
@@ -167,4 +178,12 @@ def stripe_rows(row):
 st.dataframe(
     df.style.apply(stripe_rows, axis=1),
     use_container_width=True
+)
+
+# --- Botón para descargar el archivo de estado JSON ---
+st.download_button(
+    label="Descargar estado (JSON)",
+    data=json.dumps(nuevo_estado, indent=2),
+    file_name="estado_titulos.json",
+    mime="application/json"
 )
